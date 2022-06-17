@@ -1,0 +1,118 @@
+<div>
+	<label>Bet of win</label>
+	<input type="range" max="20" min="2"><br>
+	<label>Value</label>
+	<input type="range" max="1" min="0"> <br>
+	<button onclick="set()">Set</button>
+	<button onclick="check()">Check</button>
+</div>
+<fieldset>
+	Money :<div id="money">
+	</div>
+	Value : <div id="val"></div>
+	<div id="list">
+	</div>
+</fieldset>
+<style type="text/css">
+	#set_friend {
+		overflow-y: auto;
+		height: 400;
+	}
+	#list {
+		overflow-y: auto;
+		height: 400;
+	}
+</style>
+<fieldset>
+	<legend>Action of player</legend>
+	<div id="set_friend"></div>
+</fieldset>
+<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-database.js"></script>
+<script type="text/javascript">
+
+</script>
+<script type="text/javascript">
+	const firebaseConfig = {
+		apiKey: "AIzaSyAEmq9QEvj4BWpnh0hU1Nnn1bDV2gpS6hY",
+		authDomain: "smtdfc-chat-dc1e1.firebaseapp.com",
+		databaseURL: "https://smtdfc-chat-dc1e1-default-rtdb.firebaseio.com",
+		projectId: "smtdfc-chat-dc1e1",
+		storageBucket: "smtdfc-chat-dc1e1.appspot.com",
+		messagingSenderId: "1072173341027",
+		appId: "1:1072173341027:web:c7fbba9bd3e642cb53db56",
+		measurementId: "G-4ZGYB10DDN"
+	};
+	// Initialize Firebase
+	firebase.initializeApp(firebaseConfig);
+	var list = []
+	var money = 300
+	var val = Math.floor(Math.random()*2, 2)
+	var state = false
+	var name = prompt("Enter your name :")
+	function check() {
+		state = true
+
+	}
+	function set() {
+		if (state) {
+			alert("Cannot set")
+			return 0;
+		}
+		var inp = document.getElementsByTagName("input")
+		list.push({
+			win: parseInt(inp[0].value),
+			value: parseInt(inp[1].value),
+			count: 0
+		})
+	}
+	setInterval(function() {
+		if (state == true) {
+			document.getElementById("val").innerHTML = "Value :<h1>"+val+"</h1>"
+		}
+		if (list.length == 0) {
+			state = false
+			document.getElementById("val").innerHTML = "please click check to get value...."
+			val = Math.floor(Math.random()*2, 2)
+		} else {}
+
+		document.getElementById("list").innerHTML = ""
+		document.getElementById("money").innerHTML = money
+
+
+		var new_list = []
+		for (let i = 0; i < list.length; i ++) {
+			var item = list[i]
+			document.getElementById("list").innerHTML += "<hr>Value :"+item.value+"<br>"
+			document.getElementById("list").innerHTML += "Win :"+item.win+"<br>"
+			if (state) {
+				if (item.value == val) {
+					money += item.win
+					firebase.database().ref("set").push().set({
+						"name": name,
+						"act": "Win with money "+item.win
+					})
+				} else {
+					money -= item.win/2
+				}
+			} else {
+				new_list.push(item)
+			}
+		}
+		list = new_list
+	}, 1000)
+	setInterval(function() {
+		document.getElementById("list").innerHTML = ""
+		for (let i = 0; i < list.length; i ++) {
+			var item = list[i]
+			document.getElementById("list").innerHTML += "<hr>Value :"+item.value+"<br>"
+			document.getElementById("list").innerHTML += "Win :"+item.win+"<br>"
+		}
+
+	}, 100)
+	firebase.database().ref("set").on("child_added", (data)=> {
+		document.getElementById("set_friend").innerHTML += "<hr>Name : "+data.val().name+"<br>"
+		document.getElementById("set_friend").innerHTML += "Action : "+data.val().act
+
+	})
+</script>
